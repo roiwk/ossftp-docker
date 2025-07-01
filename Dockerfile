@@ -12,9 +12,9 @@ RUN set -xe && \
 # 下载ossftp
 RUN  cd /srv && \
     curl -fSL "$OSSFTP_URL" -o ossftp.zip && \
-    unzip -o "ossftp-${OSSFTP_VERSION}-linux-mac.zip" -d /srv && \
-    rm -rf "ossftp-${OSSFTP_VERSION}-linux-mac.zip" && \
-    mv "ossftp-${OSSFTP_VERSION}-linux-mac" ossftp
+    unzip -o "ossftp.zip" -d /srv && \
+    rm -rf "ossftp.zip" && \
+    mv "ossftp" ossftp
 
 # 复制配置模板和脚本
 COPY config.template.json /srv/ossftp/config.template.json
