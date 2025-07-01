@@ -1,22 +1,22 @@
 FROM python:2-alpine
 
-# 设置版本号为环境变量
 ARG OSSFTP_VERSION=1.2.0
-ENV OSSFTP_VERSION=${OSSFTP_VERSION}
-ENV OSSFTP_URL=https://gosspublic.alicdn.com/ossftp/ossftp-${OSSFTP_VERSION}-linux-mac.zip
+ENV OSSFTP_VERSION=$OSSFTP_VERSION
 
-# 安装依赖并下载指定版本的 zip 包
 RUN set -xe && \
-    apk add --no-cache unzip curl jq
+    apk add --no-cache unzip jq
 
-# 下载ossftp
-RUN  cd /srv && \
-    curl -fSL "$OSSFTP_URL" -o ossftp.zip && \
-    unzip -o "ossftp.zip" -d /srv && \
-    rm -rf "ossftp.zip" && \
-    mv "ossftp" ossftp
+WORKDIR /srv
 
-# 复制配置模板和脚本
+# 拷贝本地 zip 安装包（从 GitHub 仓库根目录）
+COPY ossftp-${OSSFTP_VERSION}-linux-mac.zip .
+
+# 解压并安装
+RUN unzip -o ossftp-${OSSFTP_VERSION}-linux-mac.zip -d /srv && \
+    rm -f ossftp-${OSSFTP_VERSION}-linux-mac.zip && \
+    mv "ossftp-${OSSFTP_VERSION}-linux-mac" ossftp
+
+# 拷贝配置文件与启动脚本
 COPY config.template.json /srv/ossftp/config.template.json
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
@@ -26,4 +26,5 @@ EXPOSE 2048 8192
 WORKDIR /srv/ossftp
 
 ENTRYPOINT ["/entrypoint.sh"]
-CMD [ "python", "launcher/start.py" ]
+CMD ["python", "launcher/start.py"]
+
