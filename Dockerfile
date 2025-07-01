@@ -3,6 +3,7 @@ FROM python:2-alpine
 # 设置版本号为环境变量
 ARG OSSFTP_VERSION=1.2.0
 ENV OSSFTP_VERSION=${OSSFTP_VERSION}
+ENV OSSFTP_URL=https://gosspublic.alicdn.com/ossftp/ossftp-${OSSFTP_VERSION}-linux-mac.zip
 
 # 安装依赖并下载指定版本的 zip 包
 RUN set -xe && \
@@ -10,7 +11,7 @@ RUN set -xe && \
 
 # 下载ossftp
 RUN  cd /srv && \
-    curl -fsSLO "https://gosspublic.alicdn.com/ossftp/ossftp-${OSSFTP_VERSION}-linux-mac.zip" && \
+    curl -fSL "$OSSFTP_URL" -o ossftp.zip && \
     unzip -o "ossftp-${OSSFTP_VERSION}-linux-mac.zip" -d /srv && \
     rm -rf "ossftp-${OSSFTP_VERSION}-linux-mac.zip" && \
     mv "ossftp-${OSSFTP_VERSION}-linux-mac" ossftp
