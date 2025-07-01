@@ -6,8 +6,10 @@ ENV OSSFTP_VERSION=${OSSFTP_VERSION}
 
 # 安装依赖并下载指定版本的 zip 包
 RUN set -xe && \
-    apk add --no-cache unzip curl jq && \
-    cd /srv && \
+    apk add --no-cache unzip curl jq
+
+# 下载ossftp
+RUN  cd /srv && \
     curl -fsSLO "https://gosspublic.alicdn.com/ossftp/ossftp-${OSSFTP_VERSION}-linux-mac.zip" && \
     unzip -o "ossftp-${OSSFTP_VERSION}-linux-mac.zip" -d /srv && \
     rm -rf "ossftp-${OSSFTP_VERSION}-linux-mac.zip" && \
