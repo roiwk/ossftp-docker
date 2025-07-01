@@ -1,7 +1,5 @@
 FROM python:2-alpine
 
-ENV OSSFTP_VERSION=$OSSFTP_VERSION
-
 RUN set -xe && \
     apk add --no-cache unzip jq
 
