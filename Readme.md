@@ -2,7 +2,10 @@
 
 基于阿里云 OSSFTP 的轻量级 Docker 镜像，支持通过环境变量动态配置访问账号，适用于快速部署基于 FTP 协议的 OSS 文件访问服务。
 
-> 镜像版本与阿里云 OSSFTP 工具版本保持一致。当前镜像：[`roiwk/ossftp`](https://hub.docker.com/r/roiwk/ossftp)
+> 镜像版本号与阿里云官方 OSSFTP 工具版本基本保持一致，但会额外多一位补丁号用于识别构建差异。例如：
+>
+> - 官方工具版本：`1.2.0` 文档[ossftp](https://help.aliyun.com/zh/oss/developer-reference/installation-9)
+> - Docker 镜像版本：`1.2.0.1`（即 `roiwk/ossftp:1.2.0.1`） 当前镜像：[`roiwk/ossftp`](https://hub.docker.com/r/roiwk/ossftp)
 
 ---
 
@@ -11,13 +14,13 @@
 使用已构建好的公共镜像：
 
 ```bash
-docker pull roiwk/ossftp:1.2.0
+docker pull roiwk/ossftp:latest
 ```
 
 ### 方法一：使用默认配置
 
 ```bash
-docker run -p 2048:2048 -p 8192:8192 roiwk/ossftp:1.2.0
+docker run -p 2048:2048 -p 8192:8192 roiwk/ossftp:latest
 ```
 
 > 默认使用 `config.template.json` 中定义的账户信息
@@ -31,10 +34,11 @@ docker run -p 2048:2048 -p 8192:8192 \
   -e ACCOUNT_ACCESS_ID="yourAccessKeyID" \
   -e ACCOUNT_ACCESS_SECRET="yourAccessKeySecret" \
   -e ACCOUNT_BUCKET_NAME="examplebucket" \
+  -e BUCKET_ENDPOINTS= "examplebucket.bucket_endpoints"\
   -e ACCOUNT_HOME_DIR="folder1/" \
   -e ACCOUNT_LOGIN_USERNAME="user1" \
   -e ACCOUNT_LOGIN_PASSWORD="pass1" \
-  roiwk/ossftp:1.2.0
+  roiwk/ossftp:latest
 ```
 
 ---
@@ -61,7 +65,7 @@ docker run -p 2048:2048 -p 8192:8192 \
       "login_password": "pass2"
     }
   ]' \
-  roiwk/ossftp:1.2.0
+  roiwk/ossftp:latest
 ```
 
 ---
@@ -104,6 +108,34 @@ docker run -p 2048:2048 -p 8192:8192 \
 | `51000-53000` | FTP 被动模式端口（建议映射） |
 
 ---
+
+## 🌐 支持的环境变量
+
+### 账户配置（单用户模式）
+
+| 环境变量名                    | 用途               |
+| ------------------------ | ---------------- |
+| `ACCOUNT_ACCESS_ID`      | AccessKey ID     |
+| `ACCOUNT_ACCESS_SECRET`  | AccessKey Secret |
+| `ACCOUNT_BUCKET_NAME`    | Bucket 名称        |
+| `ACCOUNT_HOME_DIR`       | 可访问目录路径（可为空）     |
+| `ACCOUNT_LOGIN_USERNAME` | 登录用户名            |
+| `ACCOUNT_LOGIN_PASSWORD` | 登录密码             |
+
+### 多账户模式（推荐）
+
+| 环境变量名           | 说明                   |
+| --------------- | -------------------- |
+| `ACCOUNTS_JSON` | 包含多个账户对象的 JSON 数组字符串 |
+
+### 其他配置
+
+| 环境变量名              | 对应配置字段                            | 默认值      |
+| ------------------ | --------------------------------- | -------- |
+| `BUCKET_ENDPOINTS` | `modules.ossftp.bucket_endpoints` | `""`（空）  |
+| `LOG_LEVEL`        | `modules.ossftp.log_level`        | `"INFO"` |
+
+
 
 ## TODO / Roadmap
 
