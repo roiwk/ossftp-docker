@@ -8,7 +8,7 @@ ENV OSSFTP_VERSION=${OSSFTP_VERSION}
 RUN set -xe && \
     apk add --no-cache unzip curl jq && \
     cd /srv && \
-    curl -fsSLO --compressed "https://gosspublic.alicdn.com/ossftp/ossftp-${OSSFTP_VERSION}-linux-mac.zip?spm=a2c4g.11186623.0.0.cd6f297513XHe0&file=ossftp-${OSSFTP_VERSION}-linux-mac.zip" && \
+    curl -fsSLO "https://gosspublic.alicdn.com/ossftp/ossftp-${OSSFTP_VERSION}-linux-mac.zip" && \
     unzip -o "ossftp-${OSSFTP_VERSION}-linux-mac.zip" -d /srv && \
     rm -rf "ossftp-${OSSFTP_VERSION}-linux-mac.zip" && \
     mv "ossftp-${OSSFTP_VERSION}-linux-mac" ossftp
