@@ -20,7 +20,7 @@ docker pull roiwk/ossftp:latest
 ### 方法一：使用默认配置
 
 ```bash
-docker run -p 2048:2048 -p 8192:8192 roiwk/ossftp:latest
+docker run --name ossftp --network host roiwk/ossftp:latest
 ```
 
 > 默认使用 `config.template.json` 中定义的账户信息
@@ -30,7 +30,7 @@ docker run -p 2048:2048 -p 8192:8192 roiwk/ossftp:latest
 ### 方法二：单账户配置（使用多个环境变量）
 
 ```bash
-docker run -p 2048:2048 -p 8192:8192 \
+docker run --name ossftp --network host \
   -e ACCOUNT_ACCESS_ID="yourAccessKeyID" \
   -e ACCOUNT_ACCESS_SECRET="yourAccessKeySecret" \
   -e ACCOUNT_BUCKET_NAME="examplebucket" \
@@ -46,7 +46,7 @@ docker run -p 2048:2048 -p 8192:8192 \
 ### 方法三：多账户配置（使用 JSON 字符串）
 
 ```bash
-docker run -p 2048:2048 -p 8192:8192 \
+docker run --name ossftp --network host \
   -e ACCOUNTS_JSON='[
     {
       "access_id": "yourAccessKeyID",
