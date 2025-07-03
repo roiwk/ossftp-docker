@@ -38,10 +38,11 @@ jobs:
           fi
           echo "VERSION=${VERSION#v}" >> $GITHUB_OUTPUT
 
-      - name: Build and Push Docker Image
+      - name: Build and Push Multi-Arch Image
         uses: docker/build-push-action@v5
         with:
           context: .
+          platforms: linux/amd64,linux/arm64,linux/arm/v7
           push: true
           tags: |
             ${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.VERSION }}
