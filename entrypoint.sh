@@ -4,6 +4,13 @@ set -e
 CONFIG_TEMPLATE="/srv/ossftp/config.template.json"
 CONFIG_FINAL="/srv/ossftp/config.json"
 
+
+# ✅ 若用户已挂载 config.json，则跳过生成步骤
+if [ -f "$CONFIG_FINAL" ] && [ ! -f "$CONFIG_TEMPLATE" ]; then
+  echo "Detected mounted config.json, skipping environment-based generation."
+  exec "$@"
+fi
+
 # Prepare default config
 cp "$CONFIG_TEMPLATE" "$CONFIG_FINAL"
 

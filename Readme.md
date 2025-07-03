@@ -9,57 +9,70 @@
 
 ---
 
-## 🚀 启动容器
+## 特别限制
 
-使用已构建好的公共镜像：
+* 【官方文档说明】ossftp在同一时间只允许一台客户端连接，新发起的连接请求会导致已经连接的客户端断开。
 
-```bash
-docker pull roiwk/ossftp:latest
-```
+## 🚀 使用方式
 
-### 方法一：使用默认配置
+### ✅ 建议网络模式：`--network host`
+
+为了兼容 FTP 的被动模式端口动态连接行为，**强烈建议使用 Host 网络模式** 启动容器：
 
 ```bash
 docker run --name ossftp --network host roiwk/ossftp:latest
-```
+````
 
-> 默认使用 `config.template.json` 中定义的账户信息
+### ⚠️ 安全提示
+
+* Host 模式会将容器端口暴露在宿主机网络上，**等同于本地服务**；
+* 不建议直接用于公网或生产环境，推荐用于 **内网环境、受控服务器、开发测试场景**；
+* FTP协议是明文传输的，为了防止您的密码泄漏，建议将ossftp和客户端运行在同一台机器上，通过127.0.0.1:2048 访问。
 
 ---
 
-### 方法二：单账户配置（使用多个环境变量）
+## ⚙️ 配置方式
+
+你可以选择以下两种方式配置 OSSFTP 行为：
+
+---
+
+### 🧩 方式一：使用环境变量自动生成配置（推荐）
+
+容器启动时会自动生成 `config.json`，支持单账号或多账号配置方式：
+
+#### ✅ 单账号配置示例：
 
 ```bash
 docker run --name ossftp --network host \
   -e ACCOUNT_ACCESS_ID="yourAccessKeyID" \
   -e ACCOUNT_ACCESS_SECRET="yourAccessKeySecret" \
   -e ACCOUNT_BUCKET_NAME="examplebucket" \
-  -e BUCKET_ENDPOINTS= "examplebucket.bucket_endpoints"\
   -e ACCOUNT_HOME_DIR="folder1/" \
   -e ACCOUNT_LOGIN_USERNAME="user1" \
   -e ACCOUNT_LOGIN_PASSWORD="pass1" \
+  -e BUCKET_ENDPOINTS="oss-cn-hangzhou.aliyuncs.com" \
+  -e LOG_LEVEL="DEBUG" \
   roiwk/ossftp:latest
 ```
 
----
-
-### 方法三：多账户配置（使用 JSON 字符串）
+#### ✅ 多账号配置示例（使用 JSON）：
 
 ```bash
 docker run --name ossftp --network host \
   -e ACCOUNTS_JSON='[
     {
-      "access_id": "yourAccessKeyID",
-      "access_secret": "yourAccessKeySecret",
-      "bucket_name": "examplebucket",
+      "access_id": "xxx",
+      "access_secret": "yyy",
+      "bucket_name": "bucket1",
       "home_dir": "folder1/",
       "login_username": "user1",
       "login_password": "pass1"
     },
     {
-      "access_id": "yourAccessKeyID2",
-      "access_secret": "yourAccessKeySecret2",
-      "bucket_name": "examplebucket2",
+      "access_id": "aaa",
+      "access_secret": "bbb",
+      "bucket_name": "bucket2",
       "home_dir": "",
       "login_username": "user2",
       "login_password": "pass2"
@@ -70,12 +83,65 @@ docker run --name ossftp --network host \
 
 ---
 
-## ⚙️ 配置项说明（config.template.json）
+### 🧩 方式二：挂载自定义 `config.json` 文件
+
+如果你希望手动编写完整配置文件，可使用 `-v` 参数挂载本地配置：
+
+#### 示例：
+
+```bash
+docker run --name ossftp --network host \
+  -v $(pwd)/config.json:/srv/ossftp/config.json \
+  roiwk/ossftp:latest
+```
+
+> 挂载时容器不会使用环境变量生成配置，请自行编写完整有效的 `config.json` 文件。
+
+---
+
+## 🌐 支持的环境变量（方式一可用）
+
+### 账户配置（单用户）
+
+| 变量名                   | 描述                    |
+| ------------------------ | ----------------------- |
+| `ACCOUNT_ACCESS_ID`      | 阿里云 AccessKey ID     |
+| `ACCOUNT_ACCESS_SECRET`  | 阿里云 AccessKey Secret |
+| `ACCOUNT_BUCKET_NAME`    | Bucket 名称             |
+| `ACCOUNT_HOME_DIR`       | 访问目录前缀，可为空    |
+| `ACCOUNT_LOGIN_USERNAME` | 自定义 FTP 登录用户名   |
+| `ACCOUNT_LOGIN_PASSWORD` | 登录密码                |
+
+### 多用户模式（推荐）
+
+| 变量名          | 描述                                   |
+| --------------- | -------------------------------------- |
+| `ACCOUNTS_JSON` | 一个数组格式的完整账号配置 JSON 字符串 |
+
+### 其他参数
+
+| 变量名             | 映射字段                          | 默认值   |
+| ------------------ | --------------------------------- | -------- |
+| `BUCKET_ENDPOINTS` | `modules.ossftp.bucket_endpoints` | `""`     |
+| `LOG_LEVEL`        | `modules.ossftp.log_level`        | `"INFO"` |
+
+---
+
+## 🧾 示例配置文件结构（用于挂载）
 
 ```json
 {
   "modules": {
-    "accounts": [],
+    "accounts": [
+      {
+        "access_id": "xxx",
+        "access_secret": "yyy",
+        "bucket_name": "examplebucket",
+        "home_dir": "folder1/",
+        "login_username": "user1",
+        "login_password": "pass1"
+      }
+    ],
     "launcher": {
       "auto_start": 0,
       "control_port": 8192,
@@ -94,8 +160,6 @@ docker run --name ossftp --network host \
   }
 }
 ```
-
-默认将配置模板复制为 `config.json`，启动时根据环境变量自动覆盖 `modules.accounts` 字段。
 
 ---
 
@@ -140,12 +204,9 @@ docker run --name ossftp --network host \
 ## TODO / Roadmap
 
 * [ ] 添加 `docker-compose.yml` 示例
-* [ ] 支持 `.env` 文件注入
-* [ ] 自动检测并校验账户配置合法性
 
 ---
 
 ## License
 
 本项目基于 [MIT License](LICENSE)，阿里云 OSSFTP 工具版权归阿里云所有。
-
